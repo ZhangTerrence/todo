@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import CreateButton from "@/components/CreateButton";
+import TaskClient from "@/components/TaskClient"; // new client component
 
 export default async function HomePage() {
   const session = await auth.api.getSession({
@@ -14,18 +14,14 @@ export default async function HomePage() {
     return redirect("/login");
   }
 
-  const user = session.user;
   const tasks = await prisma.task.findMany({
-    where: {
-      userId: user.id,
-    },
+    where: { userId: session.user.id },
   });
-  console.log(tasks);
 
   return (
     <main className="h-screen w-screen">
       <LogoutButton />
-      <CreateButton />
+      <TaskClient tasks={tasks} />
     </main>
   );
 }
