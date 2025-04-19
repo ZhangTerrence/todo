@@ -3,6 +3,7 @@
 import { useState } from "react";
 import TaskInput from "./TaskInput";
 import TaskList from "./TaskList";
+import { useEffect } from "react";
 
 interface Task {
   id: string;
@@ -25,6 +26,17 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
       )
     );
   };
+  useEffect(() => {
+    const timers: { [id: string]: NodeJS.Timeout } = {};
+  
+    tasks.forEach(task => {
+      if (task.completed) {
+        timers[task.id] = setTimeout(() => {
+          setTasks(prev => prev.filter(t => t.id !== task.id));
+        }, 5000); // 5 seconds
+      }
+    });
+  });
 
   const handleAddTask = () => {
     if (!newTaskText.trim()) return;
@@ -44,7 +56,11 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
   };
 
   const pendingTasks = tasks.filter(task => !task.completed);
-  const completedTasks = tasks.filter(task => task.completed);
+const MAX_COMPLETED_TASKS = 10;
+const completedTasks = tasks
+  .filter(t => t.completed)
+  .sort((a, b) => Number(b.id) - Number(a.id))
+  .slice(0, MAX_COMPLETED_TASKS);
 
   return (
     <div className="max-w-xl mx-auto py-8 px-4">
