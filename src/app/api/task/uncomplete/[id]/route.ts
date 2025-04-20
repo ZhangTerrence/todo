@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
-      headers: getHeaders(),
+      headers: req.headers,
     });
 
     if (!session || !session.user) {
@@ -32,7 +32,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         id,
       },
       data: {
-        completed: true,
+        completed: false,
       },
     });
 
