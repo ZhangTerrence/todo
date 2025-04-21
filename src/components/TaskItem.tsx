@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { describe } from "node:test";
 
+
 type Task = {
   id: string;
   userId: string;
@@ -14,6 +15,7 @@ type Task = {
 
 
 export async function onUpdate(task: Task): Promise<Task> {
+  const priority = new Number(task.priority);
   const response = await fetch(`/api/task/${task.id}`, {
     method: "PATCH",
     headers: {
@@ -22,8 +24,8 @@ export async function onUpdate(task: Task): Promise<Task> {
     body: JSON.stringify({
       title: task.title,
       description: task.description,
-      priority: new Number(task.priority),
-      dueDate: task.dueDate?.toLocaleDateString,
+      priority: priority,
+      dueDate: task.dueDate
     }),
   });
 
@@ -33,18 +35,20 @@ export async function onUpdate(task: Task): Promise<Task> {
 }
 
 
+
 type Props = {
   task: Task;
   onToggle: (id: string) => void;
-
+  onDelete: (id: string) => void;
 };
 
-export default function TaskItem({ task, onToggle}: Props) {
+export default function TaskItem({ task, onToggle, onDelete}: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState(task);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    console.log(e.target);
     setEditedTask({
       ...editedTask,
       [name]: name === "dueDate" ? new Date(value) : value,
@@ -54,10 +58,7 @@ export default function TaskItem({ task, onToggle}: Props) {
   const handleSave = async () => {
     await onUpdate(editedTask);
     setIsEditing(false);
-    
   };
-  
-
 
   return (
     <li className="flex flex-col gap-1 border p-3 rounded mb-2 shadow-sm">
@@ -82,12 +83,18 @@ export default function TaskItem({ task, onToggle}: Props) {
             </span>
           )}
         </div>
+        <div>
         <button
           onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-          className="text-sm text-blue-500 hover:underline"
-        >
+          className="text-sm text-blue-500 hover:underline"> 
           {isEditing ? "Save" : "Edit"}
         </button>
+        <span> </span>
+        <button 
+          onClick={() => onDelete(task.id)} 
+          className="text-sm text-blue-500 hover:underline">Delete</button>
+        </div>
+        
       </div>
 
       {isEditing ? (

@@ -17,6 +17,7 @@ interface Task {
 type Props = {
   tasks: Task[];
   onToggle: (id: string) => void; // ✅ updated from number to string
+  onDelete: (id: string) => void;
   // handleUpdate: (task: Task) => Promise<void>;
   title: string;
   showCompletedStyle?: boolean;
@@ -29,6 +30,7 @@ type Props = {
 export default function TaskList({
   tasks,
   onToggle,
+  onDelete,
   title,
   showCompletedStyle,
 }: Props) {
@@ -38,7 +40,7 @@ export default function TaskList({
       {tasks.length > 0 ? (
         <ul>
           {tasks.map(task => (
-            <TaskItem key={task.id} task={task} onToggle={onToggle}/>
+            <TaskItem key={task.id} task={task} onToggle={onToggle} onDelete={onDelete}/>
           ))}
         </ul>
       ) : (

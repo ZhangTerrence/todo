@@ -71,7 +71,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     const body = await req.json();
-    const { title, description, priority, dueDate } = UpdateTask.parse(body);
+    let taskObj = {
+      ...body,
+      dueDate: new Date(body.dueDate)
+    };
+    const { title, description, priority, dueDate } = UpdateTask.parse(taskObj);
     const updatedTask = await prisma.task.update({
       where: {
         id: id,
