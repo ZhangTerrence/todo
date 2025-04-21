@@ -22,7 +22,7 @@ export async function onUpdate(task: Task): Promise<Task> {
     body: JSON.stringify({
       title: task.title,
       description: task.description,
-      priority: task.priority,
+      priority: new Number(task.priority),
       dueDate: task.dueDate?.toLocaleDateString,
     }),
   });
@@ -120,6 +120,20 @@ export default function TaskItem({ task, onToggle}: Props) {
           <p className="text-xs text-gray-500 ml-6">
             Due: {new Date(editedTask.dueDate).toLocaleDateString()}
           </p>
+        )
+      )}
+
+      {isEditing ? (
+        <input
+          name="priority"
+          type="number"
+          value={editedTask.priority ?? ""}
+          onChange={handleChange}
+          className="text-sm border rounded px-1 py-0.5 ml-6"
+        />
+      ) : (
+        1 && (
+          <p className="text-sm text-gray-600 ml-6">Priority: {editedTask.priority}</p>
         )
       )}
     </li>
