@@ -4,7 +4,10 @@ export const CreateTask = z.object({
   title: z.string(),
   description: z.string().optional(),
   priority: z.number().optional(),
-  dueDate: z.date().optional(),
+  dueDate: z.preprocess(
+    (val) => (typeof val === "string" && val ? new Date(val) : null),
+    z.date().nullable()
+  ),
 });
 
 export type CreateTaskType = z.infer<typeof CreateTask>;
