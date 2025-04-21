@@ -24,27 +24,21 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
   const [priority, setPriority] = useState(0);
 
   const handleToggle = async (id: string) => {
-    const task = tasks.find(t => t.id === id);
+    const task = tasks.find((t) => t.id === id);
     if (!task) return;
-  
-    const endpoint = task.completed 
-  ? `/api/task/uncomplete/${id}` 
-  : `/api/task/complete/${id}`;
-  
+
+    const endpoint = task.completed ? `/api/task/uncomplete/${id}` : `/api/task/complete/${id}`;
+
     try {
       const res = await fetch(endpoint, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
       });
-  
+
       if (!res.ok) throw new Error("Failed to toggle task");
-  
+
       // Optimistically update local state
-      setTasks(prev =>
-        prev.map(task =>
-          task.id === id ? { ...task, completed: !task.completed } : task
-        )
-      );
+      setTasks((prev) => prev.map((task) => (task.id === id ? { ...task, completed: !task.completed } : task)));
     } catch (err) {
       console.error("Toggle error:", err);
     }
@@ -52,14 +46,14 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
 
   useEffect(() => {
     const timers: { [id: string]: NodeJS.Timeout } = {};
-    tasks.forEach(task => {
+    tasks.forEach((task) => {
       if (task.completed) {
         timers[task.id] = setTimeout(() => {
-          setTasks(prev => prev.filter(t => t.id !== task.id));
+          setTasks((prev) => prev.filter((t) => t.id !== task.id));
         }, 50000);
       }
     });
-  
+
     return () => {
       Object.values(timers).forEach(clearTimeout);
     };
@@ -67,28 +61,28 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
 
   const handleAddTask = async () => {
     if (!title.trim()) return;
-  
+
     const newTask = {
       title,
       description,
       priority,
       dueDate,
     };
-  
+
     try {
       const res = await fetch("/api/task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newTask),
       });
-  
+
       if (!res.ok) throw new Error("Failed to create task");
-  
+
       const createdTask = await res.json();
-  
+
       // Add the task returned from the backend to state
-      setTasks(prev => [...prev, createdTask]);
-  
+      setTasks((prev) => [...prev, createdTask]);
+
       // Clear form fields
       setTitle("");
       setDescription("");
@@ -105,12 +99,13 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
     setPriority(0);
   };
 
-  const pendingTasks = tasks.filter(task => !task.completed);
+  const sortTasksByPriority = (tasks: Task[]) => {
+    return tasks.sort((a, b) => (a.priority ?? Number.NEGATIVE_INFINITY) - (b.priority ?? Number.NEGATIVE_INFINITY));
+  };
+
+  const pendingTasks = sortTasksByPriority(tasks.filter((task) => !task.completed));
   const MAX_COMPLETED_TASKS = 10;
-  const completedTasks = tasks
-    .filter(t => t.completed)
-    .sort((a, b) => Number(b.id) - Number(a.id))
-    .slice(0, MAX_COMPLETED_TASKS);
+  const completedTasks = sortTasksByPriority(tasks.filter((t) => t.completed).slice(0, MAX_COMPLETED_TASKS));
 
   return (
     <div className="max-w-xl mx-auto py-8 px-4">
@@ -126,16 +121,8 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
         onChangePriority={setPriority}
         onSubmit={handleAddTask}
       />
-      <TaskList
-        tasks={pendingTasks}
-        onToggle={handleToggle}
-        title="⏳ Pending Tasks"
-      />
-      <TaskList
-        tasks={completedTasks}
-        onToggle={handleToggle}
-        title="✅ Completed Tasks"
-      />
+      <TaskList tasks={pendingTasks} onToggle={handleToggle} title="⏳ Pending Tasks" />
+      <TaskList tasks={completedTasks} onToggle={handleToggle} title="✅ Completed Tasks" />
     </div>
   );
 }
