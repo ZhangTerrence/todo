@@ -44,20 +44,39 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
     }
   };
 
-  useEffect(() => {
-    const timers: { [id: string]: NodeJS.Timeout } = {};
-    tasks.forEach((task) => {
-      if (task.completed) {
-        timers[task.id] = setTimeout(() => {
-          setTasks((prev) => prev.filter((t) => t.id !== task.id));
-        }, 50000);
-      }
-    });
+  const onDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/task/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const updated = await response.text();
+      console.log("Updated:", updated);
+      // remove task with id from list
+      setTasks(prevList => prevList.filter(t => t.id !== id));
+    } catch(err) {
+      console.error("Delete error:", err);
+    }
+  }
 
-    return () => {
-      Object.values(timers).forEach(clearTimeout);
-    };
-  }, [tasks]);
+  // This effect is not needed 
+
+  // useEffect(() => {
+  //   const timers: { [id: string]: NodeJS.Timeout } = {};
+  //   tasks.forEach((task) => {
+  //     if (task.completed) {
+  //       timers[task.id] = setTimeout(() => {
+  //         setTasks((prev) => prev.filter((t) => t.id !== task.id));
+  //       }, 50000);
+  //     }
+  //   });
+
+  //   return () => {
+  //     Object.values(timers).forEach(clearTimeout);
+  //   };
+  // }, [tasks]);
 
   const handleAddTask = async () => {
     if (!title.trim()) return;
@@ -121,8 +140,8 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
         onChangePriority={setPriority}
         onSubmit={handleAddTask}
       />
-      <TaskList tasks={pendingTasks} onToggle={handleToggle} title="⏳ Pending Tasks" />
-      <TaskList tasks={completedTasks} onToggle={handleToggle} title="✅ Completed Tasks" />
+      <TaskList tasks={pendingTasks} onToggle={handleToggle} onDelete={onDelete} title="⏳ Pending Tasks" />
+      <TaskList tasks={completedTasks} onToggle={handleToggle} onDelete={onDelete} title="✅ Completed Tasks" />
     </div>
   );
 }
