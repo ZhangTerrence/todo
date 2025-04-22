@@ -125,7 +125,7 @@ export default function TaskItem({ task, onToggle, onDelete}: Props) {
       ) : (
         editedTask.dueDate && (
           <p className="text-xs text-gray-500 ml-6">
-            Due: {new Date(editedTask.dueDate).toLocaleDateString()}
+            Due: {editedTask.dueDate.toUTCString().split(" ").slice(0, 4).join(" ")}
           </p>
         )
       )}
