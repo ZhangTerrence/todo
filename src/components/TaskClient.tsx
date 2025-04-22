@@ -61,20 +61,22 @@ export default function TaskClient({ tasks: initialTasks }: { tasks: Task[] }) {
     }
   }
 
-  useEffect(() => {
-    const timers: { [id: string]: NodeJS.Timeout } = {};
-    tasks.forEach((task) => {
-      if (task.completed) {
-        timers[task.id] = setTimeout(() => {
-          setTasks((prev) => prev.filter((t) => t.id !== task.id));
-        }, 50000);
-      }
-    });
+  // This effect is not needed 
 
-    return () => {
-      Object.values(timers).forEach(clearTimeout);
-    };
-  }, [tasks]);
+  // useEffect(() => {
+  //   const timers: { [id: string]: NodeJS.Timeout } = {};
+  //   tasks.forEach((task) => {
+  //     if (task.completed) {
+  //       timers[task.id] = setTimeout(() => {
+  //         setTasks((prev) => prev.filter((t) => t.id !== task.id));
+  //       }, 50000);
+  //     }
+  //   });
+
+  //   return () => {
+  //     Object.values(timers).forEach(clearTimeout);
+  //   };
+  // }, [tasks]);
 
   const handleAddTask = async () => {
     if (!title.trim()) return;
